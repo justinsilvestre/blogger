@@ -1,4 +1,5 @@
 class ArticlesController < ApplicationController
+	http_basic_authenticate_with name: "dhh", password: "secret", except: [:index, :show]
 	include ArticlesHelper
 	def index
 		@articles = Article.all
@@ -18,7 +19,6 @@ class ArticlesController < ApplicationController
 			flash.notice = "Article '#{@article.title}' created!"
 			redirect_to article_path(@article)
 		else
-			flash.notice = "Could not create article."
 			render 'new'
 		end
 	end
@@ -36,9 +36,11 @@ class ArticlesController < ApplicationController
 	def update
 		@article = Article.find(params[:id])
 		@article.update(article_params)
-
-		flash.notice = "Article '#{@article.title}' updated!"
-
-		redirect_to article_path(@article)
+		if @article.save
+			flash.notice = "Article '#{@article.title}' updated!"
+			redirect_to article_path(@article)
+		else
+			render 'edit'
+		end
 	end
 end
